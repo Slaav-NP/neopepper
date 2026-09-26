@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W1SDDHK87W"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-W1SDDHK87W');
+    </script>
+
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8853519763810027"
+     crossorigin="anonymous"></script>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-File Image Compressor (Hand-Drawn Theme)</title>
+    <link rel="stylesheet" href="https://fxaeberhard.github.io/handdrawn.css/handdrawn.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        /* FIX 1: Top spacing */
+        /* Modified body to remove centering, allowing the new wrapper to handle the 3-column layout */
+        body { padding: 0; background-color: #f4f4f9; margin: 0; min-height: 100vh; }
+        
+        /* === NEW CSS FOR AD LAYOUT (3-COLUMN) === */
+        .main-content-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 1400px; /* Provides enough space for two 160px ads and the 1100px content area */
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+        
+        .ad-sidebar {
+            width: 160px; /* Standard wide-skyscraper size */
+            flex-shrink: 0;
+            margin-top: 20px;
+            /* Placeholder styles - replace with your AdSense code */
+            background-color: #e9e9e9;
+            border: 1px dashed #ccc;
+            height: 600px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            font-size: 0.8em;
+            color: #666;
+            box-sizing: border-box;
+        }
+        /* ======================================= */
+
+        /* FIX 1: Top spacing */
+        /* Modified container to remove its top margin, aligning it better within the wrapper */
+        .container { max-width: 1100px; width: 100%; text-align: center; box-sizing: border-box; margin-top: 0; }
+        
+        /* FIX 2 & 3: Reduced vertical padding and removed h1/h2 top margin inside sections for uniform spacing */
+        .section { padding: 15px 30px; background-color: white; border-radius: 15px !important; box-sizing: border-box; margin-bottom: 20px; }
+        .section > h1, .section > h2 { margin-top: 0; }
+        
+        #list-section .file-list-header { margin-top: 0; }
+        h1, .subtitle { color: #333; }
+        
+        /* Bulk Controls */
+        #bulk-controls-container { display: flex; flex-direction: column; gap: 15px; text-align: left; margin-top: 10px; }
+        .tool-group { padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; display: flex; flex-direction: row; align-items: center; flex-wrap: nowrap; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .tool-group h3 { margin: 0; font-size: 1.0em; color: #333; border: none; padding: 0; white-space: nowrap; flex-shrink: 0; }
+        .tool-description { font-size: 0.85em; color: #666; margin-left: auto; flex-grow: 1; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .tool-input-group { display: flex; gap: 5px; flex-shrink: 0; max-width: 250px; }
+        .tool-input-group input { max-width: 120px; padding: 5px 8px; box-sizing: border-box; }
+        
+        /* FIX: Correct alignment for one-click button */
+        .one-click-button-container { display: flex; flex-grow: 0; justify-content: flex-start; }
+        
+        .tool-group .btn, .one-click-button-container .btn { width: auto; margin: 0; box-sizing: border-box; }
+
+        /* UI Elements */
+        /* FIX 2: Adjusted drop area padding */
+        #drop-area { border: 2px dashed #000; border-radius: 8px; padding: 30px 20px; text-align: center; margin-bottom: 0; transition: background-color 0.3s, border-color 0.3s; background-color: #fff; }
+        #drop-area.highlight { background-color: #e9f5ff; border-color: #000; }
+        #file-upload { display: none; }
+        #file-prompt { color: #333; font-weight: bold; margin: 0; font-size: 1.1em; }
+
+        /* Grid Layout */
+        .file-list-header, .file-item { display: grid; grid-template-columns: 20px 50px 1fr 60px 80px 240px 70px 80px 80px; gap: 10px; align-items: center; text-align: center; box-sizing: border-box; }
+        .file-list-header { padding: 10px 0; border-bottom: 2px solid #333; font-weight: bold; color: #555; font-size: 0.9em; }
+        .file-item { padding: 10px 0; border-bottom: 1px solid #ddd; }
+        #file-list, #file-list li { list-style: none !important; padding: 0 !important; margin: 0 !important; }
+        #file-list li::before, #file-list li::after { content: none !important; }
+
+        /* Columns */
+        .delete-cross { grid-column: 1; text-align: center; font-size: 1.4em; color: #aaa; cursor: pointer; transition: color 0.15s; }
+        .delete-cross:hover { color: #dc3545; }
+        .grid-thumbnail { grid-column: 2; text-align: center; }
+        .grid-file-info { grid-column: 3; text-align: left; user-select: text; cursor: text; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .grid-file-type { grid-column: 4; text-align: center; }
+        .grid-original-size { grid-column: 5; text-align: center; }
+        .grid-controls { grid-column: 6; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; padding: 0 5px; }
+        .grid-quality { grid-column: 7; text-align: center; }
+        .grid-new-size { grid-column: 8; text-align: center; }
+        .grid-download-btn { grid-column: 9; text-align: center; }
+
+        .compressed-size-label { font-weight: bold; font-size: 1.1em; color: #333; }
+        .compressed-size-label.size-larger { color: #dc3545; }
+        .quality-label { font-weight: bold; font-size: 1.1em; color: #007bff; }
+
+        /* Animation */
+        .processing-animation { display: inline-flex; align-items: flex-end; justify-content: center; min-width: 50px; height: 1.1em; }
+        @keyframes pulse { 0%, 66%, 100% { opacity: 0.2; transform: scale(0.7); } 33% { opacity: 1.0; transform: scale(1.0); } }
+        .dot { width: 8px; height: 8px; margin: 0 1px; background-color: #555; border-radius: 50%; display: inline-block; animation: pulse 1.5s infinite ease-in-out both; }
+        .dot:nth-child(1) { animation-delay: -0.3s !important; } .dot:nth-child(2) { animation-delay: -0.15s !important; } .dot:nth-child(3) { animation-delay: 0s !important; }
+
+        /* Sliders & Panel */
+        .slider-control-group { display: flex; align-items: center; width: 100%; gap: 5px; justify-content: center; max-width: 270px; margin: 0 auto; }
+        .input-spinner-btn { width: 30px; height: 30px; padding: 0; line-height: 1; flex-shrink: 0; font-size: 1.2em; }
+        .quality-slider { flex-grow: 1; height: 20px; -webkit-appearance: none; width: 100%; background: transparent; margin: 0; }
+        .quality-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%; background: #dc3545; cursor: pointer; margin-top: -5px; border: 2px solid #dc3545; transition: background .15s; }
+        .quality-slider::-moz-range-thumb, .quality-slider::-ms-thumb { width: 15px; height: 15px; border-radius: 50%; background: #dc3545; cursor: pointer; border: 2px solid #dc3545; }
+
+        .floating-panel { position: sticky; bottom: 0; width: 100%; background-color: #ffffff; padding: 10px 30px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100; display: flex; align-items: center; justify-content: space-between; gap: 10px; box-sizing: border-box; margin-top: 20px; border-radius: 15px !important; border-top: none; transition: box-shadow 0.3s; }
+        .floating-panel.docked { box-shadow: none; }
+        .panel-left-group { display: flex; align-items: center; gap: 15px; }
+        .panel-button-group { display: flex; gap: 10px; margin: 0; }
+        .processing-status-label { font-weight: bold; color: #007bff; font-size: 0.9em; white-space: nowrap; }
+        
+        /* Buttons */
+        .btn { white-space: nowrap; }
+        #upload-files-button { background-color: #007bff; color: white; font-size: 0.9em; }
+        #clear-files-button { background-color: #dc3545; color: white; font-size: 0.9em; }
+        .convert-button { background-color: #ffc107; color: #333; font-size: 0.8em; }
+        .download-button, #global-download { background-color: #28a745; color: white; font-size: 0.9em; }
+
+        /* New CSS: Styles for disabled Clear/Download buttons */
+        #clear-files-button:disabled, #global-download:disabled {
+            background-color: #aaa !important; /* Grey background */
+            color: #f1f1f1 !important; /* Light text */
+            cursor: not-allowed;
+            border-color: #999 !important;
+            box-shadow: none !important;
+            opacity: 0.7; /* Slightly dim the look */
+        }
+        /* Styles for green bulk action buttons (Apply, Apply Naming, Compress to Minimum) */
+        .btn-success {
+            background-color: #28a745 !important;
+            color: white !important;
+            border-color: #28a745 !important;
+        }
+
+        /* Styles for KB/MB buttons (default inactive state) */
+        .btn-unit {
+            background-color: #f8f9fa; 
+            color: #333; 
+            border: 1px solid #ccc;
+        }
+        
+        /* New style for blue active unit button */
+        .btn-active-unit {
+            background-color: #007bff !important; /* Blue color */
+            color: white !important;
+            border-color: #007bff !important;
+        }
+
+        /* New Styles for Auto-Convert Switch (from previous step) */
+        .auto-convert-switch {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border: 1px dashed #ccc; /* Trying to fit hand-drawn theme */
+            border-radius: 5px;
+            background-color: #f7f7f7;
+            white-space: nowrap;
+        }
+        .auto-convert-switch input[type="checkbox"] {
+            /* Standard checkbox styling or simple toggle imitation */
+            width: 16px;
+            height: 16px;
+            accent-color: #007bff; /* Use primary color */
+            margin: 0;
+            cursor: pointer;
+        }
+        .auto-convert-switch .switch-label {
+            font-size: 0.9em;
+            color: #333;
+            font-weight: 500;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        /* !!! IMPORTANT FIX !!! New CSS to visually gray out disabled bulk action buttons */
+        .tool-group .btn:disabled, 
+        .one-click-button-container .btn:disabled {
+            background-color: #cccccc !important; /* Light gray background */
+            color: #888888 !important;          /* Darker gray text */
+            border-color: #aaaaaa !important;    /* Gray border */
+            cursor: not-allowed;
+            box-shadow: none !important;
+            opacity: 0.8;
+        }
+        /* Unit buttons (KB/MB) should NOT be disabled by the bulk status, so we don't apply the disabled style to them here. */
+
+        /* NEW CSS FOR COLLAPSIBLE SECTIONS */
+        .collapsible-section {
+            text-align: left; /* Align to the left as requested */
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        .collapsible-header {
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #333;
+            user-select: none;
+        }
+        .collapsible-header:hover {
+            opacity: 0.8;
+        }
+        .collapsible-content {
+            padding: 10px 0 0 10px; /* Padding for list indentation */
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+            line-height: 1.4;
+        }
+        /* INCREASED MAX HEIGHT FOR FULL ARTICLE */
+        .collapsible-content.expanded {
+            max-height: 5000px; /* Large enough value to show ALL content */
+            padding: 10px 0 15px 10px;
+        }
+        .collapsible-content p, .collapsible-content ul {
+            margin: 0 0 5px 0;
+        }
+        .collapsible-content ul {
+            list-style-type: none; /* Remove default list style for hand-drawn theme consistency */
+            padding-left: 0;
+        }
+        .collapsible-content li {
+            position: relative;
+            padding-left: 1.5em; /* Space for custom bullet */
+            margin-bottom: 5px;
+        }
+        .collapsible-content li:before {
+            content: 'o'; /* Simple circle bullet */
+            position: absolute;
+            left: 0;
+            color: #333;
+            font-size: 1em;
+            line-height: 1;
+        }
+        
+        /* NEW STYLES FOR ARTICLE SECTION - Ensuring it has the handdrawn-border style */
+        .article-section { 
+            padding: 15px 30px; 
+            background-color: white; 
+            border-radius: 15px !important; 
+            box-sizing: border-box; 
+            margin-bottom: 20px; 
+            text-align: left; /* Ensure article text is left-aligned */
+        }
+        
+        /* NEW: Styles for the hidden/shown article content */
+        #article-read-more-content, #article-seo-read-more-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+            padding-top: 0;
+        }
+        #article-read-more-content.expanded, #article-seo-read-more-content.expanded {
+             max-height: 5000px; /* Large enough to display full content */
+             padding-top: 15px;
+        }
+        /* Style for the "Read More" button */
+        #read-more-btn, #read-more-btn-seo {
+            background-color: transparent;
+            color: #007bff;
+            border: none;
+            border-bottom: 1px dashed #007bff;
+            cursor: pointer;
+            padding: 0;
+            margin-top: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            display: inline-block;
+            text-align: left;
+        }
+        #read-more-btn:hover, #read-more-btn-seo:hover {
+            color: #0056b3;
+            border-bottom-color: #0056b3;
+        }
+
+    </style>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "NeoPepper Free Bulk Image Compressor",
+      "url": "https://neopepper.com/image-compressor.html",
+      "description": "A free, web-based tool to bulk compress JPEG, PNG, and GIF images. Reduce file size while maintaining high visual quality.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Bulk image compression",
+        "JPEG, PNG, and GIF support",
+        "Custom quality settings",
+        "Target file size optimization"
+      ]
+    }
+    </script>
+
+</head>
+<body>
+    <div style="width: 100%; max-width: 1100px; padding: 10px 20px 0 20px; position: relative; z-index: 10000; text-align: left; margin: 0 auto; box-sizing: border-box;">
+        <a href="index.html" style="text-decoration: none; color: #555; font-family: 'Hand Drawn', cursive;">
+        ← Back to all tools
+        </a>
+    </div>
+
+    <div class="main-content-wrapper">
+        
+        <div id="left-ad-sidebar" class="ad-sidebar">
+            (Recommended Size: 160x600)
+        </div>
+
+        <div class="container">
+            <div id="input-section" class="section handdrawn-border">
+                <h1>Free Bulk Image Compressor/Convertor</h1>
+                <p class="subtitle">Upload multiple images (JPEG, PNG, GIF) to compress JPEGs or convert other types to JPEG.</p>
+                
+                <div id="why-use-section" class="collapsible-section">
+                    <div class="collapsible-header" onclick="toggleSection('why-use-content')">
+                        <span class="chevron-arrow">&#9660;</span> Why Use Our Free Online Image Compressor?
+                    </div>
+                    <div id="why-use-content" class="collapsible-content expanded">
+                        <p>High-quality images are crucial for a great website, but large file sizes can slow down your loading times, leading to poor user experience and lower SEO rankings. Our Free online image compressor solves this problem by allowing you to dramatically reduce the file size of multiple images without a noticeable loss in visual quality.</p>
+                        <p>It's perfect for web developers, bloggers, and anyone who manages online content and needs to optimize their media library efficiently.</p>
+                    </div>
+                </div>
+
+                <div id="key-features-section" class="collapsible-section">
+                    <div class="collapsible-header" onclick="toggleSection('key-features-content')">
+                        <span class="chevron-arrow">&#9660;</span> Key Features and Benefits
+                    </div>
+                    <div id="key-features-content" class="collapsible-content expanded">
+                        <ul>
+                            <li><strong>Bulk Compression</strong>: Upload and process multiple files simultaneously.</li>
+                            <li><strong>Convert to JPEG</strong>: Automatically or manually convert PNG, GIF, and other image formats to optimized JPEG.</li>
+                            <li><strong>Quality Slider</strong>: Fine-tune the compression level for a perfect balance between size and quality.</li>
+                            <li><strong>Max Size Limit</strong>: Set a target maximum file size (in KB or MB) and find the optimal quality automatically.</li>
+                            <li><strong>Maximum Compression</strong>: One-click button to apply 10% quality for maximum file size reduction</li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="drop-area">
+                    <input type="file" id="file-upload" accept="image/*" multiple>
+                    <p id="file-prompt">Drop Your Files Here</p>
+                </div>
+            </div>
+            <div id="tools-section" class="section handdrawn-border"> 
+                <h2>Bulk Changes</h2>
+                <div id="bulk-controls-container">
+                    <div class="tool-group handdrawn-border">
+                        <h3>Bulk Quality (%)</h3>
+                        <div class="tool-input-group"><input type="number" id="bulk-quality-input" class="handdrawn-input" min="10" max="100" value="75"><button class="btn btn-success" onclick="applyBulkQuality()">Apply</button></div>
+                        <span class="tool-description">Set compression quality (10-100) for all JPEGs.</span>
+                    </div>
+                    <div class="tool-group handdrawn-border">
+                        <h3>Maximum File Size</h3>
+                        <div class="tool-input-group">
+                            <input type="number" id="bulk-max-size-input" class="handdrawn-input" placeholder="e.g., 500" value="500">
+                            <button id="unit-kb" class="btn btn-unit btn-active-unit" onclick="selectSizeUnit(this, 'KB')">KB</button>
+                            <button id="unit-mb" class="btn btn-unit" onclick="selectSizeUnit(this, 'MB')">MB</button>
+                            <button class="btn btn-success" onclick="applyBulkMaxSize()">Apply</button>
+                        </div>
+                        <span class="tool-description">Find best quality that keeps size below this limit.</span>
+                    </div>
+                    <div class="tool-group handdrawn-border">
+                        <h3>One-Click Optimization</h3>
+                        <div class="one-click-button-container"><button class="btn btn-success" onclick="applyMinimumCompression()">Compress to Minimum</button></div>
+                        <span class="tool-description">Sets quality to 10% for all JPEGs (Max Compression).</span>
+                    </div>
+                </div>
+            </div>
+            <div id="list-section" class="section handdrawn-border"> 
+                <div class="file-list-header" id="file-list-header" style="display: none;">
+                    <div class="header-cell"></div> <div class="header-cell"></div> <div class="header-cell"></div> <div class="header-cell">Type</div> 
+                    <div class="header-cell">Original Size</div> <div class="header-cell">Compression Slider</div> <div class="header-cell">Quality</div> <div class="header-cell">New Size</div> <div class="header-cell">Download</div> 
+                </div>
+                <ul id="file-list"><li id="placeholder-text" style="padding: 20px; color: #666; font-size: 1.1em;">Your Files Will Be Here</li></ul>
+            </div>
+            
+            <div id="article-compression" class="article-section handdrawn-border">
+                <h2 style="margin-top: 0; font-size: 1.2em;">The Secret to Smaller Images: How to Shrink Files Without Ruining Quality</h2>
+                
+                <p style="margin-top: 10px;">If you manage a website, you know fast loading times are everything. Google loves fast sites, and your visitors expect it. The biggest slow-down on almost any page? The images. Using a tool like neopepper.com helps you quickly compress your images, but do you know which quality setting to pick? Choosing a quality of "80%" versus "60%" isn't just a random guess; it's a decision about speed, clarity, and how the human eye actually works. Here is the simple truth behind image compression and how to use it perfectly every time.</p>
+                
+                <div id="article-read-more-content">
+                    <h2>Why We Need to Compress: The "Digital Hoarder" Problem</h2>
+                    <p>When a camera or design program saves a photo, it saves every tiny piece of information it can—it’s a **digital hoarder**. If you have a 4-megabyte photo, it’s full of data you truly don't need for the web. **Compression** is the process of getting rid of that unnecessary data, making the file dramatically smaller. We use **lossy compression** (like the JPEG format) because it achieves the biggest size reductions, but we have to be smart about *what* we lose.</p>
+
+                    <h3>The Core Principle: Our Eyes Don't Need Everything</h3>
+                    <p>The trick to effective compression relies on a simple biological fact: **The human eye cares more about brightness and edges than subtle color shifts.**</p>
+                    <ul>
+                        <li><strong>Brightness (The Details):</strong> If the brightness of an image changes, we instantly notice it—it defines sharp lines, text, and edges. Your brain prioritizes this information.</li>
+                        <li><strong>Color (The "Filling"):</strong> If the subtle color of a large, smooth area (like a blue sky) shifts slightly, it's very difficult to notice.</li>
+                    </ul>
+                    <p>The JPEG algorithm first separates an image into these two parts (brightness and color) and then decides to throw away more of the less-important **color** data, leaving the crucial **brightness** data mostly intact. This is the first, huge, invisible win for file size reduction!</p>
+
+                    <h2>Understanding the Quality Slider: The "8x8 Rule"</h2>
+                    <p>When you move the quality slider from 100% down to 10%, you are telling the tool to get rid of more information. But it doesn't just randomly delete pixels; it follows a calculated rule.</p>
+
+                    <h3>1. The Image is Chopped into Blocks</h3>
+                    <p>The entire image is mathematically divided into tiny **8x8 pixel squares**. The compression process works on each of these small squares individually.</p>
+
+                    <h3>2. High Frequencies vs. Low Frequencies</h3>
+                    <p>Inside each 8x8 block, the computer sorts the data into two types:</p>
+                    <p style="font-weight: bold; margin-bottom: 0;">Low Frequencies:</p>
+                    <ul>
+                        <li>**What it Represents:** Large, smooth areas and basic colors (like a blue sky or a green field).</li>
+                        <li>**What Happens to it When Compressing:** **Kept.** This is the core information you must preserve.</li>
+                    </ul>
+                    <p style="font-weight: bold; margin-bottom: 0;">High Frequencies:</p>
+                    <ul>
+                        <li>**What it Represents:** Tiny details, sharp edges, fine textures, and visual "noise."</li>
+                        <li>**What Happens to it When Compressing:** **Discarded.** This is the data the slider targets first, as it’s the least noticeable when missing.</li>
+                    </ul>
+                    
+
+                    <h3>3. Finding the Tipping Point</h3>
+                    <p>The quality slider essentially determines how much of the **High Frequency** (detail) data is deleted.</p>
+                    <ul>
+                        <li><strong>High Quality (90%):</strong> You keep nearly all the high-frequency detail. The file size remains large.</li>
+                        <li><strong>Optimal Quality (70%–80%):</strong> You discard a lot of invisible or unimportant detail, achieving a huge file size reduction without a visible change in quality. **This is your sweet spot.**</li>
+                        <li><strong>Low Quality (30%):</strong> You start discarding too much high-frequency data, and the 8x8 blocks become visible, creating ugly, boxy patterns called **"artifacts."**</li>
+                    </ul>
+
+                    <h2>Your Action Plan: How to Win at Compression</h2>
+                    <p>Using this knowledge, you can approach image optimization like a pro:</p>
+                    <ul>
+                        <li><strong>Start High, Then Drop:</strong> Always start your compression test at a high quality (like 90%) and then gradually lower it until you notice the first small visual defect. Then, slide it back up one notch. That is your perfect setting.</li>
+                        <li><strong>Aim for the 70–85% Range:</strong> For most web photos (especially large hero images), the file size drops dramatically between 100% and 80%, with very little change in appearance. This range is usually the safest and most efficient.</li>
+                        <li><strong>Always Check the File Size Limit:</strong> Use features like the **Maximum File Size** limit (available in neopepper.com) to automate the process. Instead of guessing the quality percentage, you tell the tool, "Find the best quality that keeps this photo under 100KB." This is the best way to optimize for Google's Core Web Vitals.</li>
+                    </ul>
+                    <p>By intelligently removing the data your visitors' eyes don't care about, you cut down loading times, improve your Google search ranking, and keep your website fast and professional.</p>
+                </div>
+                <button id="read-more-btn" onclick="toggleReadMore(this)">Read More</button>
+            </div>
+
+            <div id="article-seo" class="article-section handdrawn-border">
+                <h2 style="margin-top: 0; font-size: 1.2em;">Beyond Speed: The Image SEO Checklist to Rank Your JPEGs and PNGs in Google Image Search</h2>
+                
+                <p style="margin-top: 10px;">You’ve optimized your images for speed, but are you optimizing them for visibility? For websites constrained to the reliable <strong>JPEG</strong> and <strong>PNG</strong> formats, maximizing performance is only half the battle. The other half is ensuring Google understands what your image is about so it can rank it in Google Image Search and inform your overall page ranking. Here is the essential checklist for making sure your JPEGs (photos) and PNGs (graphics) are perfectly optimized for SEO.</p>
+                
+                <div id="article-seo-read-more-content">
+                    
+                    <h3 style="margin-top: 10px; font-size: 1.1em;">1. The File Name Advantage (Before You Upload)</h3>
+                    <p>Your file name is the very first signal Google's crawler receives about an image's content. A descriptive file name is crucial for ranking.</p>
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 1px dashed #333; padding: 5px;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid #333;">
+                                <th style="padding: 5px; text-align: left;">The SEO Problem</th>
+                                <th style="padding: 5px; text-align: left;">The SEO Solution</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 5px;"><strong>❌ Bad:</strong> <code>DSC0001.jpg</code> or <code>logo-final-v2.png</code></td>
+                                <td style="padding: 5px;"><strong>✅ Good:</strong> <code>red-leather-wallet-front.jpeg</code></td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 5px;"><strong>❌ Bad:</strong> Using spaces or odd characters: <code>blue dress.png</code></td>
+                                <td style="padding: 5px;"><strong>✅ Good:</strong> Use only lowercase letters and hyphens: <code>blue-silk-dress-for-sale.png</code></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 5px;"><strong>❌ Bad:</strong> Keyword stuffing: <code>red-dress-sale-shop-buy-discount.jpg</code></td>
+                                <td style="padding: 5px;"><strong>✅ Good:</strong> Keep it concise and descriptive: <code>red-knee-length-cocktail-dress.jpg</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p style="margin-bottom: 15px; font-style: italic;"><strong>Action Item:</strong> Before you use an image compression tool or upload, rename your files to be descriptive and keyword-rich, separated by hyphens.</p>
+
+                    <h3 style="margin-top: 10px; font-size: 1.1em;">2. The Alt Text Gold Standard (The Non-Negotiable)</h3>
+                    <p>The <code>alt</code> attribute (Alternative Text) is non-negotiable for two reasons: accessibility and SEO. It is the text a screen reader uses to describe an image to a visually impaired user, and it is the primary way Google understands the content of your image.</p>
+                    
+                    <p style="font-weight: bold; margin-bottom: 5px;">Alt Text Best Practices Checklist:</p>
+                    <ul>
+                        <li>Describe the Image: Be literal about what is in the photo.</li>
+                        <li>Incorporate a Target Keyword (Naturally): If you are targeting the keyword "minimalist desk setup," use it in your description.</li>
+                        <li>Keep it Concise: Ideally under 125 characters, but prioritize description over length.</li>
+                        <li>Avoid "Image of..." or "Picture of...": Google already knows it's an image.</li>
+                    </ul>
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 1px dashed #333; padding: 5px;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid #333;">
+                                <th style="padding: 5px; text-align: left; width: 25%;">Image Type</th>
+                                <th style="padding: 5px; text-align: left; width: 35%;">Example Image</th>
+                                <th style="padding: 5px; text-align: left; width: 40%;">Example Alt Text</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid #eee;">
+                                <td style="padding: 5px;"><strong>JPEG</strong> (Photo)</td>
+                                <td style="padding: 5px;">A close-up photo of a woman drinking coffee.</td>
+                                <td style="padding: 5px;"><code>Close-up of a woman smiling while drinking coffee at a rustic wooden table.</code></td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 5px;"><strong>PNG</strong> (Logo)</td>
+                                <td style="padding: 5px;">A company logo with a blue shield and a star.</td>
+                                <td style="padding: 5px;"><code>[Your Company Name] official logo, featuring a blue shield and a white star.</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p style="margin-bottom: 15px; font-style: italic;"><strong>Action Item:</strong> Review every image on your website and ensure its <code>alt</code> text is descriptive, keyword-optimized, and useful for accessibility.</p>
+                    
+                    <h3 style="margin-top: 10px; font-size: 1.1em;">3. Surrounding Text is Context (The Unseen SEO Factor)</h3>
+                    <p>Google doesn't just read the image code; it uses the text <em>around</em> the image to determine its relevance and context.</p>
+                    <ul>
+                        <li><strong>Headings:</strong> The <code>&lt;h1&gt;</code> or <code>&lt;h2&gt;</code> directly before your image should introduce the topic.</li>
+                        <li><strong>Captions:</strong> Use the <code>&lt;figcaption&gt;</code> element to provide a clear, descriptive caption that reinforces your target keywords.</li>
+                        <li><strong>Body Text:</strong> Place your image within a paragraph of text that is highly relevant to the image's content.</li>
+                    </ul>
+                    <p><strong>For example:</strong> If your photo is of a <em>custom-built dog house</em>, place it immediately after a paragraph describing the <strong>benefits of a custom-built dog house</strong> and use "custom-built dog house" in a caption.</p>
+
+                    <h3 style="margin-top: 10px; font-size: 1.1em;">4. Ensure Indexing with an XML Image Sitemap</h3>
+                    <p>For sites with hundreds or thousands of JPEGs and PNGs, an image sitemap is critical. Google may not discover every image just by crawling your HTML.</p>
+                    <ul>
+                        <li><strong>What is it?</strong> A dedicated XML file that explicitly lists the location of all your images.</li>
+                        <li><strong>Why use it?</strong> It helps Google find images that are loaded via JavaScript, lazy-loaded, or simply buried deep in your site structure.</li>
+                        <li><strong>Best Practice:</strong> Submit a separate image sitemap via your Google Search Console to guarantee all your high-value, optimized JPEGs and PNGs are indexed correctly.</li>
+                    </ul>
+
+                    <h3 style="margin-top: 10px; font-size: 1.1em;">The Final Step: Compression is the Foundation</h3>
+                    <p>While SEO drives visibility, file size remains a ranking factor (via Core Web Vitals). All these SEO efforts are wasted if the images load slowly. Whether you use JPEG or PNG, your final step before uploading must be a pass through a high-quality compression tool. This ensures:</p>
+                    <ul>
+                        <li>Maximum File Size Reduction: Shrinking the file size of your JPEGs and PNGs without compromising the quality needed for SEO.</li>
+                        <li>Clean Metadata: Stripping unnecessary camera and software metadata that bloats the file size but serves no SEO purpose.</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>SEO and speed work together:</strong> When you use an efficient tool to compress your properly named and tagged JPEGs and PNGs, you achieve the best of both worlds: high visibility in search and a fast user experience.</p>
+                </div>
+                <button id="read-more-btn-seo" onclick="toggleArticle('article-seo-read-more-content', this)">Read More</button>
+            </div>
+            <div class="floating-panel">
+                <div class="panel-left-group">
+                    <div class="panel-button-group"><button id="upload-files-button" class="btn">Upload Files</button></div>
+                    <div class="auto-convert-switch">
+                        <input type="checkbox" id="auto-convert-jpeg" onchange="toggleAutoConvert(this)" checked>
+                        <label for="auto-convert-jpeg" class="switch-label">Auto-Convert to JPEG</label>
+                    </div>
+                    <button id="clear-files-button" class="btn">Clear</button>
+                    <button id="global-download" class="btn">Download All (0)</button>
+                </div>
+                <div id="processing-status" class="processing-status-label" style="display: none;"></div>
+            </div>
+        </div>
+        <div id="right-ad-sidebar" class="ad-sidebar">
+            (Recommended Size: 160x600)
+        </div>
+
+    </div>
+    <script>
+        const imageUpload = document.getElementById('file-upload'), dropArea = document.getElementById('drop-area'), fileListContainer = document.getElementById('file-list');
+        const fileListHeader = document.getElementById('file-list-header'), globalDownloadButton = document.getElementById('global-download');
+        const uploadFilesButton = document.getElementById('upload-files-button'), clearFilesButton = document.getElementById('clear-files-button');
+        const floatingPanel = document.querySelector('.floating-panel'), processingStatusLabel = document.getElementById('processing-status');
+        const listSection = document.getElementById('list-section'); // Added this line to reference the list section
+        const whyUseContent = document.getElementById('why-use-content'); // NEW
+        const keyFeaturesContent = document.getElementById('key-features-content'); // NEW
+        // NEW: Article Content Reference
+        const articleReadMoreContent = document.getElementById('article-read-more-content'); 
+        const readMoreButton = document.getElementById('read-more-btn'); 
+        // NEW: Article Content Reference for SEO article
+        const articleSeoReadMoreContent = document.getElementById('article-seo-read-more-content'); 
+        const readMoreSeoButton = document.getElementById('read-more-btn-seo'); 
+
+        const MAX_THUMBNAIL_SIZE = 50, MIN_QUALITY = 10, MAX_QUALITY = 100, DEFAULT_CONVERSION_QUALITY = 90; 
+        let filesMap = new Map(), totalFilesToProcess = 0, filesProcessedCount = 0;
+        let currentMaxSizeUnit = 'KB'; // Global variable for the selected unit
+        let autoConvertJpeg = true; // Set to true by default
+
+        const generateUniqueId = () => 'file_' + Date.now() + Math.random().toString(16).slice(2);
+        const getFileNameWithoutExtension = (name) => { const idx = name.lastIndexOf('.'); return (idx === -1 || idx === 0) ? name : name.substring(0, idx); };
+        const getProcessingAnimationHTML = () => `<div class="processing-animation"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+
+        // Function to toggle the new "Read More" article section - MODIFIED TO BE GENERIC
+        function toggleArticle(contentId, button) { 
+            const content = document.getElementById(contentId);
+            if (!content) return;
+            
+            content.classList.toggle('expanded');
+            
+            if (content.classList.contains('expanded')) {
+                button.textContent = 'Read Less';
+            } else {
+                button.textContent = 'Read More';
+            }
+        }
+
+        // Wrapper to maintain backward compatibility for existing button (id='read-more-btn')
+        function toggleReadMore(button) {
+            toggleArticle('article-read-more-content', button);
+        }
+        
+        // OLD FUNCTION: Toggle Collapsible Sections - FIXED ARROW SIZE
+        function toggleSection(contentId) {
+            const content = document.getElementById(contentId);
+            const header = content.previousElementSibling;
+            const arrow = header ? header.querySelector('.chevron-arrow') : null;
+
+            content.classList.toggle('expanded');
+            
+            // Use large arrows: &#9660; (Down Triangle) for expanded, &#9658; (Right Triangle) for collapsed.
+            if (arrow) {
+                arrow.innerHTML = content.classList.contains('expanded') ? '&#9660;' : '&#9658;'; 
+            }
+        }
+
+        // OLD FUNCTION: Collapse Both Sections
+        function collapseInfoSections() {
+            if (whyUseContent.classList.contains('expanded')) {
+                toggleSection('why-use-content');
+            }
+            if (keyFeaturesContent.classList.contains('expanded')) {
+                toggleSection('key-features-content');
+            }
+            // NO ACTION NEEDED ON ARTICLE HERE, IT'S HANDLED BY READ MORE BUTTON
+        }
+
+        // OLD FUNCTION: Expand Both Sections (used only on clear/load)
+        function expandInfoSections() {
+            if (!whyUseContent.classList.contains('expanded')) {
+                toggleSection('why-use-content');
+            }
+            if (!keyFeaturesContent.classList.contains('expanded')) {
+                toggleSection('key-features-content');
+            }
+            // ENSURE ARTICLE IS COLLAPSED (READ MORE STATE) ON CLEAR
+            if (articleReadMoreContent && readMoreButton && articleReadMoreContent.classList.contains('expanded')) {
+                articleReadMoreContent.classList.remove('expanded');
+                readMoreButton.textContent = 'Read More';
+            }
+            // NEW: Collapse SEO article on clear
+            if (articleSeoReadMoreContent && readMoreSeoButton && articleSeoReadMoreContent.classList.contains('expanded')) {
+                articleSeoReadMoreContent.classList.remove('expanded');
+                readMoreSeoButton.textContent = 'Read More';
+            }
+        }
+
+
+        // Function to toggle the auto-convert state
+        function toggleAutoConvert(checkbox) {
+            autoConvertJpeg = checkbox.checked;
+        }
+
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024, i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals < 0 ? 0 : decimals)) + ' ' + ['Bytes', 'KB', 'MB', 'GB', 'TB'][i];
+        }
+
+        function parseSizeInput(sizeString) {
+            if (!sizeString) return 0;
+            const match = sizeString.trim().toUpperCase().replace(/ /g, '').match(/^(\d+(\.\d+)?)([KMG]?B?)$/);
+            if (!match) return 0;
+            const val = parseFloat(match[1]), unit = match[3];
+            return Math.round(val * (unit === 'KB' ? 1024 : unit === 'MB' ? 1048576 : unit === 'GB' ? 1073741824 : 1));
+        }
+
+        function compressOrConvertImage(img, mimeType, quality) {
+            return new Promise(resolve => {
+                const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d');
+                canvas.width = img.width; canvas.height = img.height;
+                if (mimeType === 'image/jpeg') { ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+                ctx.drawImage(img, 0, 0);
+                canvas.toBlob(resolve, mimeType, quality / 100); 
+            });
+        }
+        
+        function updateNewSizeDisplay(id, originalSize, newSize) {
+            const lbl = document.querySelector(`[data-id="${id}-size-label"]`);
+            if (lbl) { newSize > originalSize ? lbl.classList.add('size-larger') : lbl.classList.remove('size-larger'); lbl.textContent = formatBytes(newSize); }
+        }
+        
+        function updateQualityUI(id, newQuality) {
+            const slider = document.querySelector(`input[data-id="${id}-quality-slider"]`), lbl = document.querySelector(`[data-id="${id}-quality-label"]`);
+            if (slider) slider.value = newQuality;
+            if (lbl) lbl.textContent = `${newQuality}%`;
+        }
+
+        function updateDisplayName(id) {
+            const data = filesMap.get(id), el = document.querySelector(`[data-id="${id}-name-display"] strong`);
+            if (data && el) el.textContent = getFileNameWithoutExtension(data.originalName);
+        }
+        
+        function updateProcessingStatus() {
+            if (totalFilesToProcess > 0 && filesProcessedCount < totalFilesToProcess) {
+                processingStatusLabel.textContent = `Processed ${filesProcessedCount}/${totalFilesToProcess} files...`; processingStatusLabel.style.display = 'block';
+            } else {
+                processingStatusLabel.style.display = 'none'; totalFilesToProcess = 0; filesProcessedCount = 0;
+            }
+        }
+        
+        async function findOptimalQualityByMaxSize(img, maxSizeBytes) {
+            let optimalQuality = MIN_QUALITY, finalBlob = null, finalSize = 0;
+            for (let q = MAX_QUALITY; q >= MIN_QUALITY; q--) {
+                try {
+                    const blob = await compressOrConvertImage(img, 'image/jpeg', q);
+                    if (blob.size <= maxSizeBytes) { optimalQuality = q; finalBlob = blob; finalSize = blob.size; break; }
+                    if (q === MIN_QUALITY) { optimalQuality = MIN_QUALITY; finalBlob = blob; finalSize = blob.size; }
+                } catch (e) { continue; }
+            }
+            return { optimalQuality, finalBlob, finalSize };
+        }
+
+        function renderFileItem(id, file, positionElement = null, isConversion = false) {
+            const fileType = file.type.split('/')[1] || 'unknown', isJPEG = fileType.toLowerCase().includes('jpg') || fileType.toLowerCase().includes('jpeg');
+            const isConvertible = file.type.startsWith('image/');
+            filesMap.set(id, { file, id, originalName: file.name, originalSize: file.size, currentBlob: file, isJPEG, isConverted: isConversion, isCompressed: false, currentQuality: MAX_QUALITY, isProcessed: isJPEG || isConversion, img: null, initialCompressedSize: file.size });
+
+            let controlsHTML = isJPEG || isConversion ? `<div class="slider-control-group"><button class="input-spinner-btn btn" data-id="${id}-minus" onclick="updateQuality('${id}', 'minus')">-</button><input type="range" class="quality-slider handdrawn-input" min="${MIN_QUALITY}" max="${MAX_QUALITY}" value="${MAX_QUALITY}" step="1" data-id="${id}-quality-slider" oninput="handleSliderInput('${id}')" onchange="handleSliderChange('${id}')"><button class="input-spinner-btn btn" data-id="${id}-plus" onclick="updateQuality('${id}', 'plus')">+</button></div>` : (isConvertible ? `<button class="convert-button btn" data-id="${id}-convert-btn" onclick="convertToJpg('${id}')">Convert to JPEG</button>` : `<span class="unsupported-message">Unsupported.</span>`);
+            
+            const li = document.createElement('li'); li.className = 'file-item'; li.id = id;
+            li.innerHTML = `<div class="delete-cross" onclick="deleteFileItem('${id}')" title="Remove">&times;</div><div class="grid-thumbnail"><img class="thumbnail" alt="Thumb" data-id="${id}-thumbnail"></div><div class="grid-file-info" data-id="${id}-name-display"><strong>${getFileNameWithoutExtension(file.name)}</strong></div><div class="grid-file-type"><span class="file-type-display">${(isConversion?'JPEG':fileType).toUpperCase()}</span></div><div class="grid-original-size"><span class="size-original">${formatBytes(file.size)}</span></div><div class="grid-controls">${controlsHTML}</div><div class="grid-quality"><div class="quality-label" data-id="${id}-quality-label">${getProcessingAnimationHTML()}</div></div><div class="grid-new-size"><div class="compressed-size-label" data-id="${id}-size-label">${getProcessingAnimationHTML()}</div></div><div class="grid-download-btn"><button class="download-button btn" onclick="downloadFile('${id}')">Download</button></div>`;
+            
+            positionElement ? positionElement.insertAdjacentElement('afterend', li) : fileListContainer.appendChild(li);
+            // Delete placeholder text if it exists
+            const placeholder = document.getElementById('placeholder-text');
+            if (placeholder) placeholder.remove();
+
+            initializeFileProcessing(id, file);
+            updateGlobalDownloadButtonVisibility();
+            if (isJPEG || isConversion) updateButtonStates(id); 
+        }
+        
+        function replaceFileItem(oldId, newBlob, originalFileName, wasConversion) {
+            const oldItem = document.getElementById(oldId);
+            if (!oldItem) return;
+            filesMap.delete(oldId);
+            const newId = generateUniqueId();
+            renderFileItem(newId, new File([newBlob], originalFileName, { type: 'image/jpeg', lastModified: Date.now() }), oldItem, wasConversion); 
+            oldItem.remove();
+            updateGlobalDownloadButtonVisibility();
+        }
+
+        function handleSliderInput(id) {
+            const data = filesMap.get(id), slider = document.querySelector(`input[data-id="${id}-quality-slider"]`), lbl = document.querySelector(`[data-id="${id}-quality-label"]`);
+            if (data && slider && lbl) { lbl.textContent = `${slider.value}%`; updateButtonStates(id, true); }
+        }
+
+        async function handleSliderChange(id) {
+            const data = filesMap.get(id), slider = document.querySelector(`input[data-id="${id}-quality-slider"]`);
+            if (data && data.img && slider) { data.currentQuality = parseInt(slider.value); await compressFile(id, data.currentQuality); updateButtonStates(id); }
+        }
+
+        function updateQuality(id, direction) {
+            const data = filesMap.get(id), slider = document.querySelector(`input[data-id="${id}-quality-slider"]`);
+            if (!data || !data.img || !slider || slider.disabled) return;
+            let nq = data.currentQuality;
+            if (direction === 'minus') nq = Math.max(MIN_QUALITY, nq - 5);
+            else if (direction === 'plus') nq = Math.min(MAX_QUALITY, nq + 5);
+            if (nq !== data.currentQuality) { slider.value = nq; data.currentQuality = nq; handleSliderInput(id); handleSliderChange(id); }
+        }
+        
+        async function compressFile(id, qualityPercentage) {
+            const data = filesMap.get(id), sizeLabel = document.querySelector(`[data-id="${id}-size-label"]`), qualityLabel = document.querySelector(`[data-id="${id}-quality-label"]`);
+            if (!data || !data.img) return;
+            sizeLabel.innerHTML = getProcessingAnimationHTML(); qualityLabel.textContent = `${qualityPercentage}%`; updateButtonStates(id, true);
+            try {
+                const newBlob = await compressOrConvertImage(data.img, 'image/jpeg', qualityPercentage);
+                data.currentBlob = newBlob; data.currentQuality = qualityPercentage; data.isCompressed = newBlob.size < data.originalSize;
+                updateNewSizeDisplay(id, data.originalSize, newBlob.size);
+            } catch (e) { console.error(e); data.currentBlob = data.file; }
+            qualityLabel.textContent = `${qualityPercentage}%`; updateDisplayName(id); updateButtonStates(id); 
+        }
+        
+        async function convertToJpg(id) {
+            const data = filesMap.get(id), btn = document.querySelector(`.convert-button[data-id="${id}-convert-btn"]`);
+            if (!data || !data.img) return;
+            if (btn) { btn.textContent = `Converting...`; btn.disabled = true; }
+            const sl = document.querySelector(`[data-id="${id}-size-label"]`), ql = document.querySelector(`[data-id="${id}-quality-label"]`);
+            if (sl) sl.innerHTML = getProcessingAnimationHTML(); if (ql) ql.innerHTML = getProcessingAnimationHTML();
+            try {
+                const newBlob = await compressOrConvertImage(data.img, 'image/jpeg', DEFAULT_CONVERSION_QUALITY);
+                replaceFileItem(id, newBlob, data.originalName, true);
+            } catch (e) { if (btn) { btn.textContent = 'Failed'; btn.disabled = false; } }
+        }
+        
+        const getDownloadFileName = (data) => `${getFileNameWithoutExtension(data.originalName)}.${(data.currentBlob.type.split('/')[1]||'jpg').replace('jpeg','jpg')}`;
+
+        function downloadFile(id) {
+            const data = filesMap.get(id);
+            if (data && data.currentBlob) saveAs(data.currentBlob, getDownloadFileName(data));
+            else alert("Not ready.");
+        }
+        
+        function processFiles(files) {
+            // TRACKING CODE: Tell Google files were added
+            gtag('event', 'tool_interaction', { 'action': 'upload_files', 'count': files.length });
+
+            // NEW: Collapse info sections when files are uploaded
+            collapseInfoSections();
+
+            const arr = Array.from(files);
+            filesProcessedCount = 0; totalFilesToProcess = filesMap.size + arr.length;
+            arr.forEach(file => file.type.startsWith('image/') ? renderFileItem(generateUniqueId(), file) : filesProcessedCount++);
+            updateGlobalDownloadButtonVisibility(); updateProcessingStatus();
+        }
+        
+        function deleteFileItem(id) {
+            const el = document.getElementById(id); if (el) el.remove();
+            filesMap.delete(id); updateGlobalDownloadButtonVisibility();
+            totalFilesToProcess = filesMap.size; filesProcessedCount = filesMap.size; updateProcessingStatus();
+            // Re-insert placeholder if list is empty
+            if (filesMap.size === 0) {
+                 fileListContainer.innerHTML = '<li id="placeholder-text" style="padding: 20px; color: #666; font-size: 1.1em;">Your Files Will Be Here</li>';
+                 // NEW: Expand info sections when files are cleared
+                 expandInfoSections();
+            }
+        }
+        
+        function clearAllFiles() {
+            filesMap.clear(); fileListContainer.innerHTML = ''; imageUpload.value = '';
+            // Re-insert placeholder immediately after clearing
+            fileListContainer.innerHTML = '<li id="placeholder-text" style="padding: 20px; color: #666; font-size: 1.1em;">Your Files Will Be Here</li>';
+            totalFilesToProcess = 0; filesProcessedCount = 0; updateProcessingStatus(); updateGlobalDownloadButtonVisibility();
+            // NEW: Expand info sections when files are cleared
+            expandInfoSections();
+        }
+
+        async function findOptimalQualityAndCompress(id, img) {
+            const data = filesMap.get(id);
+            if (!data || (!data.isJPEG && !data.isConverted)) return MIN_QUALITY;
+            const res = await findOptimalQualityByMaxSize(img, data.originalSize);
+            data.currentBlob = res.finalBlob || data.file; data.initialCompressedSize = res.finalSize || data.originalSize;
+            data.currentQuality = res.finalBlob ? res.optimalQuality : MIN_QUALITY; data.isCompressed = res.finalSize < data.originalSize;
+            updateNewSizeDisplay(id, data.originalSize, data.initialCompressedSize);
+            updateQualityUI(id, data.currentQuality); updateButtonStates(id);
+            filesProcessedCount++; updateProcessingStatus();
+            return data.currentQuality;
+        }
+
+        async function initializeFileProcessing(id, file) {
+            const data = filesMap.get(id); if (!data) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = new Image();
+                img.onload = async () => {
+                    data.img = img;
+                    const c = document.createElement('canvas'), r = Math.min(MAX_THUMBNAIL_SIZE / img.width, MAX_THUMBNAIL_SIZE / img.height);
+                    c.width = img.width * r; c.height = img.height * r; c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                    const thumb = document.querySelector(`img.thumbnail[data-id="${id}-thumbnail"]`);
+                    if (thumb) thumb.src = c.toDataURL('image/png');
+
+                    // Auto-convert non-JPEGs if the switch is on
+                    if (autoConvertJpeg && !data.isJPEG) {
+                        const sl = document.querySelector(`[data-id="${id}-size-label"]`), ql = document.querySelector(`[data-id="${id}-quality-label"]`);
+                        if (sl) sl.innerHTML = getProcessingAnimationHTML(); if (ql) ql.innerHTML = getProcessingAnimationHTML();
+                        await convertToJpg(id); 
+                        return; // Exit the onload for the original non-JPEG file after triggering conversion/replacement
+                    }
+
+                    if (data.isJPEG || data.isConverted) await findOptimalQualityAndCompress(id, img);
+                    else {
+                        const sl = document.querySelector(`[data-id="${id}-size-label"]`), ql = document.querySelector(`[data-id="${id}-quality-label"]`);
+                        if (sl) { sl.textContent = 'N/A'; sl.classList.remove('size-larger'); } if (ql) ql.textContent = 'N/A';
+                        filesProcessedCount++; updateProcessingStatus();
+                    }
+                }; img.src = e.target.result;
+            }; reader.readAsDataURL(file);
+        }
+        
+        function updateButtonStates(id, forceDisable = false) {
+            const data = filesMap.get(id), minBtn = document.querySelector(`.input-spinner-btn[data-id="${id}-minus"]`), plusBtn = document.querySelector(`.input-spinner-btn[data-id="${id}-plus"]`), slider = document.querySelector(`input[data-id="${id}-quality-slider"]`);
+            if (!minBtn || !plusBtn || !slider) return;
+            if (forceDisable) { minBtn.classList.add('disabled'); plusBtn.classList.add('disabled'); slider.disabled = true; return; }
+            slider.disabled = false;
+            data.currentQuality <= MIN_QUALITY ? minBtn.classList.add('disabled') : minBtn.classList.remove('disabled');
+            data.currentQuality >= MAX_QUALITY ? plusBtn.classList.add('disabled') : plusBtn.classList.remove('disabled');
+        }
+        
+        // New function to handle disabling of Bulk Action buttons and inputs
+        function updateBulkButtonStates(filesExist) {
+            const bulkApplyButtons = document.querySelectorAll('#tools-section .btn-success');
+            const bulkCompressButton = document.querySelector('#tools-section .one-click-button-container .btn');
+            const maxSizeInput = document.getElementById('bulk-max-size-input');
+            const qualityInput = document.getElementById('bulk-quality-input');
+            
+            // Disable all Apply and Compress buttons
+            [...bulkApplyButtons, bulkCompressButton].forEach(btn => {
+                btn.disabled = !filesExist;
+            });
+
+            // Disable inputs
+            maxSizeInput.disabled = !filesExist;
+            qualityInput.disabled = !filesExist;
+            
+            // KB/MB buttons remain active as they are not selected here
+        }
+
+        function updateGlobalDownloadButtonVisibility() {
+            const count = filesMap.size;
+            fileListHeader.style.display = count > 0 ? 'grid' : 'none';
+            
+            // Logic change: Always visible, but disabled if count is 0
+            globalDownloadButton.textContent = `Download All (${count})`;
+            globalDownloadButton.disabled = count === 0;
+            clearFilesButton.disabled = count === 0;
+
+            // Call the new function to update the bulk controls state
+            updateBulkButtonStates(count > 0);
+
+            // Remove placeholder text if files exist, add if they don't
+            const placeholder = document.getElementById('placeholder-text');
+            if (placeholder) placeholder.style.display = count > 0 ? 'none' : 'list-item';
+        }
+
+        async function applyBulkAction(filesToProcess, skipCount, action, msg) {
+            if (filesMap.size === 0) return alert("Please upload files first.");
+            const btn = document.activeElement, originalText = btn.textContent;
+            btn.textContent = msg; btn.disabled = true;
+            totalFilesToProcess = filesMap.size; filesProcessedCount = skipCount; updateProcessingStatus();
+            for (const data of filesToProcess) { await action(data.id, data); filesProcessedCount++; updateProcessingStatus(); }
+            btn.textContent = originalText; btn.disabled = false; updateProcessingStatus();
+        }
+        
+        async function handleCompressionBulkAction(type) {
+            // TRACKING CODE: Tell Google a bulk action was used (Quality, Max Size, or Min Compression)
+            gtag('event', 'tool_interaction', { 'action': 'bulk_apply_' + type });
+
+            let q = null, max = null, msg = "";
+            if (type === 'quality') { 
+                q = parseInt(document.getElementById('bulk-quality-input').value); 
+                if (isNaN(q) || q < 10 || q > 100) return alert("Enter quality 10-100."); 
+                msg = `Applying Quality ${q}%...`; 
+            }
+            else if (type === 'maxSize') { 
+                const sizeNumber = parseFloat(document.getElementById('bulk-max-size-input').value);
+                if (isNaN(sizeNumber) || sizeNumber <= 0) return alert("Enter a valid size number.");
+                
+                // Use the global variable for unit
+                const unit = currentMaxSizeUnit; 
+                // KB (1024), MB (1048576)
+                max = Math.round(sizeNumber * (unit === 'KB' ? 1024 : 1048576)); 
+
+                if (!max) return alert("Enter valid size."); 
+                msg = `Applying Max Size...`; 
+            }
+            else { 
+                q = MIN_QUALITY; 
+                msg = "Compressing to Minimum..."; 
+            }
+
+            const toProc = Array.from(filesMap.values()).filter(d => {
+                if (!(d.isJPEG || d.isConverted)) return false;
+                if (type === 'quality' && d.currentQuality === q) return false;
+                if (type === 'minCompression' && d.currentQuality === MIN_QUALITY) return false;
+                return type !== 'maxSize' || (d.currentBlob.size > Math.min(max, d.originalSize));
+            });
+            
+            await applyBulkAction(toProc, filesMap.size - toProc.length, async (id, data) => {
+                let targetQ = q;
+                if (type === 'maxSize') {
+                    const res = await findOptimalQualityByMaxSize(data.img, Math.min(max, data.originalSize));
+                    data.currentBlob = res.finalBlob; targetQ = res.optimalQuality;
+                }
+                const sl = document.querySelector(`input[data-id="${id}-quality-slider"]`); if (sl) sl.value = targetQ;
+                await compressFile(id, targetQ);
+            }, msg);
+        }
+
+        async function applyBulkQuality() { return handleCompressionBulkAction('quality'); }
+        async function applyBulkMaxSize() { return handleCompressionBulkAction('maxSize'); }
+        async function applyMinimumCompression() { return handleCompressionBulkAction('minCompression'); }
+        
+        // Function to handle unit selection and styling
+        function selectSizeUnit(button, unit) {
+            currentMaxSizeUnit = unit;
+            const kbButton = document.getElementById('unit-kb');
+            const mbButton = document.getElementById('unit-mb');
+            
+            // Remove active class from all unit buttons
+            kbButton.classList.remove('btn-active-unit');
+            mbButton.classList.remove('btn-active-unit');
+            
+            // Add active class to the clicked button
+            button.classList.add('btn-active-unit');
+        }
+
+
+        // REMOVED: applyFileNameModification function 
+        
+        function checkIfDocked() {
+             const h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight, document.body.offsetHeight, document.documentElement.offsetHeight, document.body.clientHeight, document.documentElement.clientHeight);
+             ((window.scrollY || document.documentElement.scrollTop) + window.innerHeight) >= (h - 2) || h <= window.innerHeight ? floatingPanel.classList.add('docked') : floatingPanel.classList.remove('docked');
+        }
+
+        dropArea.onclick = () => imageUpload.click(); uploadFilesButton.onclick = () => imageUpload.click(); clearFilesButton.onclick = clearAllFiles;
+        imageUpload.onchange = e => e.target.files.length && processFiles(e.target.files);
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => dropArea.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); if(evt==='drop') { dropArea.classList.remove('highlight'); if(e.dataTransfer.files.length) processFiles(e.dataTransfer.files); } else if (evt!=='dragleave') dropArea.classList.add('highlight'); else dropArea.classList.remove('highlight'); }));
+
+        globalDownloadButton.onclick = async () => {
+            // TRACKING CODE: The "Win" event!
+            gtag('event', 'tool_interaction', { 'action': 'download_all_results' });
+
+            const zips = Array.from(filesMap.values()).filter(d => d.currentBlob && (d.isJPEG || d.isConverted || !d.isProcessed));
+            if (!zips.length) return alert("No files.");
+            if (zips.length === 1) return saveAs(zips[0].currentBlob, getDownloadFileName(zips[0]));
+            const zip = new JSZip(), txt = globalDownloadButton.textContent;
+            globalDownloadButton.textContent = "Zipping..."; globalDownloadButton.disabled = true; processingStatusLabel.style.display = 'block'; processingStatusLabel.textContent = "Creating ZIP...";
+            zips.forEach(d => {
+                let n = getDownloadFileName(d), c = 1, u = n;
+                while (zip.files[u]) { const idx = n.lastIndexOf('.'); u = `${n.substring(0, idx)}_${c}${n.substring(idx)}`; c++; }
+                zip.file(u, d.currentBlob);
+            });
+            try { saveAs(await zip.generateAsync({ type: "blob" }), "compressed_images.zip"); } catch (e) { alert("Zip failed."); }
+            globalDownloadButton.textContent = txt; globalDownloadButton.disabled = false; processingStatusLabel.style.display = 'none';
+        };
+
+        window.onscroll = checkIfDocked; window.onresize = checkIfDocked; 
+        window.onload = () => { 
+            checkIfDocked(); 
+            // Call on load to set initial disabled/enabled state
+            updateGlobalDownloadButtonVisibility(); 
+            updateProcessingStatus(); 
+            // NEW: Ensure sections are expanded on load (handled by initial HTML/CSS but good practice)
+            expandInfoSections();
+            // OLD CHEVRON CODE REMOVED - NOT NEEDED FOR READ MORE
+        };
+    </script>
+</body>
+</html>

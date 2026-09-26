@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Color Palettes – NeoPepper</title>
+  <meta name="description" content="Curated modern color palettes for UI, branding, and web design." />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    header {
+      padding: 24px;
+      max-width: 1200px;
+      margin: auto;
+    }
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 32px;
+    }
+    p {
+      margin: 0;
+      color: #475569;
+    }
+    .grid {
+      max-width: 1200px;
+      margin: auto;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+    }
+    .swatches {
+      display: flex;
+      height: 140px;
+    }
+    .swatch {
+      flex: 1;
+    }
+    .card-title {
+      padding: 12px 14px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+    }
+    .modal.open {
+      display: flex;
+    }
+    .modal-content {
+      background: white;
+      max-width: 700px;
+      width: 100%;
+      border-radius: 20px;
+      padding: 24px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .close {
+      font-size: 22px;
+      cursor: pointer;
+    }
+    .palette-preview {
+      display: flex;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      height: 120px;
+    }
+    .color-box {
+      flex: 1;
+    }
+    .colors {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+    .color-item {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      font-family: monospace;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .color-sample {
+      height: 40px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+    }
+    footer {
+      text-align: center;
+      padding: 30px 20px;
+      font-size: 13px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Color Palettes</h1>
+  <p>Curated modern color palettes for UI, branding, and web design.</p>
+</header>
+
+<section class="grid" id="paletteGrid"></section>
+
+<!-- Modal -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle"></h2>
+      <span class="close" onclick="closeModal()">×</span>
+    </div>
+    <div class="palette-preview" id="modalPreview"></div>
+    <div class="colors" id="modalColors"></div>
+    <p style="margin-top:16px;color:#475569">Click any color to copy HEX value.</p>
+  </div>
+</div>
+
+<footer>
+  © NeoPepper – Color Palette Tool
+</footer>
+
+<script>
+  const palettes = [
+    {
+      name: "Soft Blue UI",
+      colors: ["#EAF2FF", "#B5D0FF", "#4C7DFF", "#1F3C88"]
+    },
+    {
+      name: "Warm Pastel",
+      colors: ["#FFF1E6", "#FFD6A5", "#FF9F1C", "#CC5803"]
+    },
+    {
+      name: "Dark Slate",
+      colors: ["#0F172A", "#1E293B", "#475569", "#CBD5E1"]
+    },
+    {
+      name: "Mint Fresh",
+      colors: ["#ECFDF5", "#A7F3D0", "#34D399", "#065F46"]
+    }
+  ];
+
+  const grid = document.getElementById('paletteGrid');
+  const modal = document.getElementById('modal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalPreview = document.getElementById('modalPreview');
+  const modalColors = document.getElementById('modalColors');
+
+  palettes.forEach((palette) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const swatches = document.createElement('div');
+    swatches.className = 'swatches';
+
+    palette.colors.forEach(c => {
+      const s = document.createElement('div');
+      s.className = 'swatch';
+      s.style.background = c;
+      swatches.appendChild(s);
+    });
+
+    const title = document.createElement('div');
+    title.className = 'card-title';
+    title.textContent = palette.name;
+
+    card.appendChild(swatches);
+    card.appendChild(title);
+
+    card.onclick = () => openModal(palette);
+    grid.appendChild(card);
+  });
+
+  function openModal(palette) {
+    modalTitle.textContent = palette.name;
+    modalPreview.innerHTML = '';
+    modalColors.innerHTML = '';
+
+    palette.colors.forEach(c => {
+      const box = document.createElement('div');
+      box.className = 'color-box';
+      box.style.background = c;
+      modalPreview.appendChild(box);
+
+      const item = document.createElement('div');
+      item.className = 'color-item';
+      item.innerHTML = `<div class="color-sample" style="background:${c}"></div>${c}`;
+      item.onclick = () => copyColor(c);
+      modalColors.appendChild(item);
+    });
+
+    modal.classList.add('open');
+  }
+
+  function closeModal() {
+    modal.classList.remove('open');
+  }
+
+  function copyColor(color) {
+    navigator.clipboard.writeText(color);
+    alert(color + ' copied');
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W1SDDHK87W"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-W1SDDHK87W');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Color Picker with Zoom and Preview</title>
+    <link rel="stylesheet" href="https://fxaeberhard.github.io/handdrawn.css/handdrawn.css">
+    <style>
+        /* GLOBAL */
+        body { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh; 
+            background-color: #f4f4f9; 
+            margin: 0; 
+            padding: 10px; 
+            font-family: 'Hand Drawn', cursive;
+        }
+        .container { 
+            max-width: 1100px; 
+            width: 100%; 
+            text-align: center; 
+        }
+        .section { 
+            padding: 10px 20px; 
+            background-color: white; 
+            border-radius: 15px !important; 
+            box-sizing: border-box; 
+            margin-bottom: 10px; 
+        }
+        h1 { color: #333; font-size: 2.0em; margin-top: 0; margin-bottom: 5px; } 
+        .subtitle { font-size: 1.0em; color: #666; margin-bottom: 10px; }
+        
+        #image-input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 10px; 
+        }
+        #drop-area { 
+            padding: 20px 20px; 
+            border: 2px dashed #000; 
+            border-radius: 8px; 
+            text-align: center; 
+            background-color: #fff; 
+            cursor: pointer;
+        }
+        #file-upload-input { display: none; }
+        #url-input-container { 
+            display: flex; 
+            gap: 10px; 
+            align-items: stretch; 
+            width: 100%; 
+        }
+        #url-input-container input { flex-grow: 1; }
+
+        #main-image-area {
+            display: flex; 
+            justify-content: center;
+            align-items: center;
+            position: relative; 
+        }
+
+        #canvas-container {
+            width: 100%; 
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 250px;
+            background-color: #eee;
+            border: 2px solid #333;
+            border-radius: 10px;
+            box-shadow: 3px 3px 0 0 rgba(0, 0, 0, 0.1);
+            z-index: 10; 
+        }
+        
+        #image-canvas { 
+            cursor: crosshair; 
+            display: none; 
+            background-color: #fff; 
+            max-width: 100%; 
+            border-radius: 8px; 
+        }
+
+        #canvas-placeholder { color: #666; font-size: 1.0em; padding: 15px; }
+        
+        #magnifier-container {
+            position: absolute; 
+            width: 150px; 
+            height: 150px; 
+            border-radius: 50%;
+            overflow: hidden; 
+            border: 4px solid #fff; 
+            box-shadow: 0 0 0 2px #000, 0 5px 15px rgba(0,0,0,0.3); 
+            pointer-events: none; 
+            z-index: 9999; 
+            display: none; 
+            background-color: white;
+        }
+        #magnifier-canvas { image-rendering: pixelated; }
+
+        #color-history-section {
+            padding: 10px 20px; 
+            background-color: white; 
+            border-radius: 15px !important; 
+            box-sizing: border-box; 
+            margin-bottom: 10px; 
+            display: flex;
+            align-items: center; 
+            gap: 10px; 
+        }
+
+        .history-divider {
+            height: 50px;
+            width: 1px;
+            background-color: #ccc;
+            border-left: 1px dashed #ccc;
+        }
+        
+        .history-nav-btn {
+            font-size: 1.5em;
+            padding: 5px 10px;
+            height: 50px; 
+            min-width: 40px; 
+            background-color: transparent !important; 
+            border: none !important; 
+            box-shadow: none !important; 
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+        }
+        
+        .history-nav-btn i {
+            font-family: 'handdrawn-icons', cursive !important;
+            font-size: 2.5em !important; 
+            line-height: 0;      
+            display: inline-block; 
+            font-style: normal; 
+            position: relative; 
+            top: -4px;           
+            color: #666 !important; 
+        }
+
+        #live-swatch { 
+            width: 50px; 
+            height: 50px; 
+            border: 2px solid #333; 
+            border-radius: 8px; 
+        }
+
+        #history-grid-container {
+            flex-grow: 1; 
+            overflow-x: scroll; 
+            overflow-y: hidden; 
+            white-space: nowrap; 
+            padding: 5px 0; 
+        }
+        #history-grid-container::-webkit-scrollbar { display: none; }
+        
+        #history-grid {
+            display: flex;
+            flex-wrap: nowrap; 
+            gap: 8px;
+            align-items: center;
+            height: 50px; 
+            width: 100%; 
+            justify-content: flex-start;
+        }
+
+        #history-placeholder {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            width: 100%; 
+            height: 100%; 
+            font-size: 1.4em; 
+            color: #666; 
+            margin: 0;
+            text-align: center;
+        }
+
+        .history-item {
+            display: inline-flex; 
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px;
+            flex-shrink: 0;
+        }
+        .history-swatch {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #000;
+            border-radius: 4px;
+            margin-bottom: 3px;
+        }
+        .history-hex { font-size: 0.7em; font-weight: bold; }
+
+        #color-codes-line {
+            display: flex;
+            flex-wrap: wrap; 
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px; 
+            margin-top: 10px;
+        }
+        .code-result-compact {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex: 1 1 30%; 
+            min-width: 250px; 
+        }
+        .code-result-compact label {
+            font-weight: bold;
+            font-size: 1.0em;
+            min-width: 40px; 
+            text-align: right;
+        }
+        .code-result-compact input { flex-grow: 1; text-align: center; }
+    </style>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "NeoPepper Free Image Color Picker",
+      "url": "https://neopepper.com/color-picker.html",
+      "description": "Extract HEX, RGB, and HSL color codes from any image or URL. Features a precision magnifier and color history.",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Precision color picking",
+        "Magnified preview",
+        "HEX, RGB, and HSL support",
+        "Image URL support"
+      ]
+    }
+    </script>
+
+</head>
+<body>
+    <div style="width: 100%; max-width: 1100px; padding: 10px 0; position: relative; z-index: 10000; text-align: left;">
+        <a href="index.html" style="text-decoration: none; color: #555; font-family: 'Hand Drawn', cursive;">
+            ← Back to all tools
+        </a>
+    </div>
+
+    <div class="container">
+        <div class="section handdrawn-border">
+            <h1>Free Image Color Picker</h1>
+            <p class="subtitle">Upload an image from your PC or paste an image URL.</p>
+        </div>
+
+        <div class="section handdrawn-border" id="image-input-section">
+            <input type="file" id="file-upload-input" accept="image/*">
+            <div id="drop-area" onclick="document.getElementById('file-upload-input').click()">
+                <p>Click here or Drop an Image File</p>
+            </div>
+            <div id="url-input-container">
+                <input type="text" id="image-url-input" class="handdrawn-input" placeholder="...or paste image URL">
+                <button class="btn btn-primary" onclick="loadImageUrl()">Load URL</button>
+            </div>
+        </div>
+        
+        <div class="section handdrawn-border" id="color-history-section">
+            <div id="live-swatch-container">
+                <div id="live-swatch" style="background-color: #FFFFFF;"></div>
+            </div>
+            <div class="history-divider"></div>
+            <button class="btn history-nav-btn" id="history-scroll-left">
+                <i class="handdrawn-icon-chevron-left">&lt;</i>
+            </button>
+            <div id="history-grid-container">
+                <div id="history-grid">
+                    <p id="history-placeholder">Your Colors Will Be Here</p>
+                </div>
+            </div>
+            <button class="btn history-nav-btn" id="history-scroll-right">
+                <i class="handdrawn-icon-chevron-right">&gt;</i>
+            </button>
+        </div>
+
+        <div class="section handdrawn-border" id="color-codes-line">
+            <div class="code-result-compact">
+                <label>HEX</label>
+                <input type="text" id="hex-output" value="#FFFFFF" readonly class="handdrawn-input">
+                <button class="btn" onclick="copyCode('hex-output')">Copy</button>
+            </div>
+            <div class="code-result-compact">
+                <label>RGB</label>
+                <input type="text" id="rgb-output" value="rgb(255, 255, 255)" readonly class="handdrawn-input">
+                <button class="btn" onclick="copyCode('rgb-output')">Copy</button>
+            </div>
+            <div class="code-result-compact">
+                <label>HSL</label>
+                <input type="text" id="hsl-output" value="hsl(0, 0%, 100%)" readonly class="handdrawn-input">
+                <button class="btn" onclick="copyCode('hsl-output')">Copy</button>
+            </div>
+        </div>
+
+        <div class="section handdrawn-border" id="main-image-area">
+            <div id="canvas-container">
+                <div id="canvas-placeholder">Upload an image to start picking colors.</div>
+                <canvas id="image-canvas"></canvas>
+            </div>
+            <div id="magnifier-container">
+                <canvas id="magnifier-canvas" width="150" height="150"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('file-upload-input');
+        const canvas = document.getElementById('image-canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const canvasContainer = document.getElementById('canvas-container');
+        const canvasPlaceholder = document.getElementById('canvas-placeholder');
+        const magnifierContainer = document.getElementById('magnifier-container');
+        const magnifierCanvas = document.getElementById('magnifier-canvas');
+        const magnifierCtx = magnifierCanvas.getContext('2d', { willReadFrequently: true });
+        const liveSwatch = document.getElementById('live-swatch');
+        const hexOutput = document.getElementById('hex-output');
+        const rgbOutput = document.getElementById('rgb-output');
+        const hslOutput = document.getElementById('hsl-output');
+        const historyGrid = document.getElementById('history-grid');
+        const historyGridContainer = document.getElementById('history-grid-container');
+        const scrollLeftBtn = document.getElementById('history-scroll-left');
+        const scrollRightBtn = document.getElementById('history-scroll-right');
+
+        let colorHistory = [];
+
+        function hexToRgb(hex) {
+            const bigint = parseInt(hex.slice(1), 16);
+            return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
+        }
+        
+        function rgbToHex(r, g, b) {
+            const toHex = (c) => c.toString(16).padStart(2, '0');
+            return "#" + toHex(r) + toHex(g) + toHex(b);
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+            if (max !== min) {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            } else { h = 0; s = 0; }
+            return `hsl(${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%)`;
+        }
+        
+        function updateSelectedColor(r, g, b) {
+            const hex = rgbToHex(r, g, b).toUpperCase();
+            hexOutput.value = hex;
+            rgbOutput.value = `rgb(${r}, ${g}, ${b})`;
+            hslOutput.value = rgbToHsl(r, g, b);
+            addToColorHistory(hex);
+        }
+        
+        function updateLiveColor(r, g, b) {
+            liveSwatch.style.backgroundColor = rgbToHex(r, g, b);
+        }
+
+        function addToColorHistory(hex) {
+            if (colorHistory[0] === hex) return;
+            colorHistory = [hex, ...colorHistory.filter(c => c !== hex)];
+            renderColorHistory();
+        }
+
+        function renderColorHistory() {
+            historyGrid.innerHTML = '';
+            if (colorHistory.length === 0) {
+                 historyGrid.style.justifyContent = 'center';
+                 historyGrid.innerHTML = '<p id="history-placeholder">Your Colors Will Be Here</p>';
+                 scrollLeftBtn.style.visibility = 'hidden';
+                 scrollRightBtn.style.visibility = 'hidden';
+                 return;
+            }
+            historyGrid.style.justifyContent = 'flex-start';
+            scrollLeftBtn.style.visibility = 'visible';
+            scrollRightBtn.style.visibility = 'visible';
+            colorHistory.forEach(hex => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.onclick = () => {
+                    const [r, g, b] = hexToRgb(hex);
+                    updateSelectedColor(r, g, b);
+                    navigator.clipboard.writeText(hex);
+                };
+                item.innerHTML = `<div class="history-swatch" style="background-color: ${hex}"></div><div class="history-hex">${hex}</div>`;
+                historyGrid.appendChild(item);
+            });
+        }
+
+        scrollLeftBtn.onclick = () => historyGridContainer.scrollBy({ left: -150, behavior: 'smooth' });
+        scrollRightBtn.onclick = () => historyGridContainer.scrollBy({ left: 150, behavior: 'smooth' });
+
+        function drawImageToCanvas(img) {
+            const containerWidth = canvasContainer.clientWidth;
+            const ratio = containerWidth / img.width;
+            canvas.width = img.width * ratio;
+            canvas.height = img.height * ratio;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            canvasPlaceholder.style.display = 'none';
+            canvas.style.display = 'block';
+        }
+
+        function handleImageLoad(source) {
+            // TRACKING CODE: Tells Google an image was loaded into the picker
+            gtag('event', 'tool_interaction', { 'action': 'load_image' });
+
+            const img = new Image();
+            img.crossOrigin = 'anonymous'; 
+            img.onload = () => { canvas.originalImage = img; drawImageToCanvas(img); };
+            img.src = source;
+        }
+
+        fileInput.onchange = (e) => {
+            const reader = new FileReader();
+            reader.onload = (event) => handleImageLoad(event.target.result);
+            reader.readAsDataURL(e.target.files[0]);
+        };
+
+        function loadImageUrl() {
+            handleImageLoad(document.getElementById('image-url-input').value.trim());
+        }
+
+        canvas.onmousemove = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mainRect = document.getElementById('main-image-area').getBoundingClientRect();
+            
+            const x = Math.round(e.clientX - rect.left);
+            const y = Math.round(e.clientY - rect.top);
+            const mX = e.clientX - mainRect.left;
+            const mY = e.clientY - mainRect.top;
+
+            magnifierContainer.style.left = `${mX - 160}px`; 
+            magnifierContainer.style.top = `${mY - 160}px`; 
+            magnifierContainer.style.display = 'block';
+
+            /* --- UPDATED: 5x5 GRID LOGIC --- */
+            const zoomSize = 5; 
+            const pixelDisplaySize = 150 / zoomSize; // Each pixel is 30x30
+            const centerIdx = Math.floor(zoomSize / 2); // Index 2 is the center
+
+            magnifierCtx.imageSmoothingEnabled = false;
+            magnifierCtx.clearRect(0, 0, 150, 150);
+            
+            // Draw sampled pixels
+            magnifierCtx.drawImage(canvas, x - centerIdx, y - centerIdx, zoomSize, zoomSize, 0, 0, 150, 150);
+
+            // Draw thin white grid (slightly more visible)
+            magnifierCtx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+            magnifierCtx.lineWidth = 1;
+            for (let i = 0; i <= zoomSize; i++) {
+                magnifierCtx.beginPath();
+                magnifierCtx.moveTo(i * pixelDisplaySize, 0);
+                magnifierCtx.lineTo(i * pixelDisplaySize, 150);
+                magnifierCtx.stroke();
+                magnifierCtx.beginPath();
+                magnifierCtx.moveTo(0, i * pixelDisplaySize);
+                magnifierCtx.lineTo(150, i * pixelDisplaySize);
+                magnifierCtx.stroke();
+            }
+
+            // Draw Red Border for center pixel
+            magnifierCtx.strokeStyle = "red";
+            magnifierCtx.lineWidth = 2;
+            magnifierCtx.strokeRect(centerIdx * pixelDisplaySize, centerIdx * pixelDisplaySize, pixelDisplaySize, pixelDisplaySize);
+            
+            const data = ctx.getImageData(x, y, 1, 1).data;
+            updateLiveColor(data[0], data[1], data[2]);
+        };
+
+        canvas.onmouseleave = () => magnifierContainer.style.display = 'none';
+        canvas.onclick = (e) => {
+            // TRACKING CODE: Tells Google a color was selected from the image
+            gtag('event', 'tool_interaction', { 'action': 'pick_color_manual' });
+
+            const rect = canvas.getBoundingClientRect();
+            const data = ctx.getImageData(Math.round(e.clientX - rect.left), Math.round(e.clientY - rect.top), 1, 1).data;
+            updateSelectedColor(data[0], data[1], data[2]);
+        };
+
+        function copyCode(id) {
+            // TRACKING CODE: Tells Google a color code (HEX/RGB/HSL) was copied
+            gtag('event', 'tool_interaction', { 'action': 'copy_color_code', 'code_type': id });
+
+            const el = document.getElementById(id);
+            navigator.clipboard.writeText(el.value);
+            const old = el.value;
+            el.value = "Copied!";
+            setTimeout(() => el.value = old, 800);
+        }
+
+        window.onresize = () => canvas.originalImage && drawImageToCanvas(canvas.originalImage);
+        window.onload = () => renderColorHistory();
+    </script>
+</body>
+</html>

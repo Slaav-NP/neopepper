@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W1SDDHK87W"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-W1SDDHK87W');
+    </script>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoPepper | Free Online Productivity & Design Tools</title>
+    <meta name="description" content="Access a collection of free, simple web tools including a bulk image compressor and color picker. Optimized for speed and ease of use.">
+    <link rel="stylesheet" href="https://fxaeberhard.github.io/handdrawn.css/handdrawn.css">
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "NeoPepper Tools",
+      "url": "https://www.neopepper.com",
+      "applicationCategory": "ProductivityApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    }
+    </script>
+
+    <style>
+        body { 
+            background-color: #f4f4f9; 
+            margin: 0; 
+            padding: 10px; /* Reduced body padding */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+        .container { 
+            max-width: 1000px; 
+            width: 100%; 
+            text-align: center; 
+        }
+        .hero-section {
+            margin-bottom: 20px;
+            padding: 10px 20px;
+        }
+        h1 { color: #333; font-size: 2.5em; margin-bottom: 5px; margin-top: 0; }
+        .subtitle { font-size: 1.1em; color: #555; max-width: 700px; margin: 0 auto; }
+
+        /* Tools Grid */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            padding: 0; /* Removed padding to save vertical space */
+        }
+
+        .tool-card {
+            background: white;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border-radius: 15px !important; 
+            padding: 0px 25px; /* Vertical padding handled by margins inside */
+            min-height: 180px; /* Lowered to fit screen */
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 5px 5px 0px 0px rgba(0,0,0,0.1);
+        }
+
+        .tool-card h2 {
+            margin-top: 15px; /* Symmetrical top spacing */
+            margin-bottom: 5px;
+            color: #007bff;
+            font-size: 1.6em;
+        }
+
+        .tool-card p {
+            color: #666;
+            font-size: 0.95em;
+            line-height: 1.3;
+            margin-bottom: 5px; /* Minimal gap to button */
+            margin-top: 0;
+        }
+
+        /* Button alignment and spacing */
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            margin-bottom: 15px; /* Symmetrical bottom spacing */
+        }
+
+        .btn-launch {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 8px 30px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 15px 0; /* Tightened footer */
+            font-size: 0.85em;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="container">
+        <section class="hero-section section handdrawn-border" style="border-radius: 15px !important;">
+            <h1>NeoPepper Tools</h1>
+            <p class="subtitle">Simple, fast, and free web-based tools designed to optimize your workflow.</p>
+        </section>
+
+        <div class="tools-grid">
+            <a href="image-compressor.html" class="tool-card section handdrawn-border" onclick="gtag('event', 'select_content', { 'content_type': 'tool', 'item_id': 'image_compressor' });">
+                <div>
+                    <h2>Image Compressor</h2>
+                    <p>Bulk compress JPEG, PNG, and GIF files. Set custom quality levels to boost your website's performance.</p>
+                </div>
+                <div class="btn-container">
+                    <span class="btn-launch">Launch Tool</span>
+                </div>
+            </a>
+
+            <a href="color-picker.html" class="tool-card section handdrawn-border" onclick="gtag('event', 'select_content', { 'content_type': 'tool', 'item_id': 'color_picker' });">
+                <div>
+                    <h2>Color Picker</h2>
+                    <p>Extract HEX, RGB, and HSL codes. Upload an image from your PC or paste a URL to pick colors with precision.</p>
+                </div>
+                <div class="btn-container">
+                    <span class="btn-launch">Launch Tool</span>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <footer>
+        &copy; 2026 NeoPepper
+    </footer>
+
+</body>
+</html>
