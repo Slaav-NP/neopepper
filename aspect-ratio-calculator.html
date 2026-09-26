@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W1SDDHK87W"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-W1SDDHK87W');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aspect Ratio Calculator | NeoPepper</title>
+    <meta name="description" content="Free aspect ratio calculator. Enter width and height in pixels to get ratios like 16:9 or 4:3, or calculate a missing dimension.">
+    <link rel="stylesheet" href="https://fxaeberhard.github.io/handdrawn.css/handdrawn.css">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "NeoPepper Aspect Ratio Calculator",
+      "url": "https://neopepper.com/aspect-ratio-calculator.html",
+      "description": "Calculate aspect ratios from pixel dimensions or find a missing width/height for common ratios like 16:9 and 4:3.",
+      "applicationCategory": "DesignApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Calculate aspect ratio from width and height",
+        "Simplify to common ratios like 16:9 and 4:3",
+        "Calculate missing dimension from a known ratio"
+      ]
+    }
+    </script>
+
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 10px;
+            font-family: 'Hand Drawn', cursive;
+        }
+        .container {
+            max-width: 1100px;
+            width: 100%;
+            text-align: center;
+        }
+        .section {
+            padding: 15px 25px;
+            background-color: white;
+            border-radius: 15px !important;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: #333;
+            font-size: 2.0em;
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            font-size: 1.0em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #333;
+            font-size: 1.35em;
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            text-align: left;
+        }
+        @media (max-width: 700px) {
+            .calc-grid { grid-template-columns: 1fr; }
+        }
+
+        .field-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+            margin-bottom: 14px;
+        }
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1 1 120px;
+            min-width: 110px;
+        }
+        .field label {
+            font-weight: bold;
+            font-size: 0.95em;
+            color: #333;
+        }
+        .field input,
+        .field select {
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .field-hint {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .result-box {
+            background: #f8f8fc;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-top: 8px;
+            text-align: center;
+        }
+        .result-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .result-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #007bff;
+            letter-spacing: 0.02em;
+        }
+        .result-meta {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 6px;
+        }
+
+        .preview-wrap {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 140px;
+            margin-top: 12px;
+            background: #eee;
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+        #ratio-preview {
+            background: #007bff;
+            border: 2px solid #222;
+            border-radius: 4px;
+            max-width: 100%;
+            max-height: 160px;
+            transition: width 0.2s, height 0.2s;
+            box-shadow: 3px 3px 0 0 rgba(0,0,0,0.12);
+        }
+
+        .preset-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .preset-btn {
+            font-size: 0.9em;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+        .preset-btn.active {
+            background-color: #007bff !important;
+            color: white !important;
+        }
+
+        .btn-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 4px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px dashed #ccc;
+            margin: 16px 0;
+        }
+    </style>
+</head>
+<body>
+    <div style="width: 100%; max-width: 1100px; padding: 10px 0; position: relative; z-index: 10000; text-align: left;">
+        <a href="index.html" style="text-decoration: none; color: #555; font-family: 'Hand Drawn', cursive;">
+            ← Back to all tools
+        </a>
+    </div>
+
+    <div class="container">
+        <div class="section handdrawn-border">
+            <h1>Aspect Ratio Calculator</h1>
+            <p class="subtitle">Enter width and height in pixels to get the ratio, or fill in one side and a ratio to find the missing dimension.</p>
+        </div>
+
+        <div class="calc-grid">
+            <!-- Calculate ratio from W × H -->
+            <div class="section handdrawn-border">
+                <h2>Calculate Ratio</h2>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="width-input">Width (px)</label>
+                        <input type="number" id="width-input" class="handdrawn-input" min="1" step="1" value="1920" placeholder="e.g. 1920">
+                    </div>
+                    <div class="field">
+                        <label for="height-input">Height (px)</label>
+                        <input type="number" id="height-input" class="handdrawn-input" min="1" step="1" value="1080" placeholder="e.g. 1080">
+                    </div>
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-primary" id="calc-ratio-btn">Calculate Ratio</button>
+                    <button type="button" class="btn" id="swap-dims-btn">Swap W ↔ H</button>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-label">Aspect Ratio</div>
+                    <div class="result-value" id="ratio-output">16:9</div>
+                    <div class="result-meta" id="ratio-decimal">Decimal: 1.778 · 1920 × 1080 px</div>
+                </div>
+
+                <div class="preview-wrap">
+                    <div id="ratio-preview" style="width: 160px; height: 90px;" title="Visual preview of the ratio"></div>
+                </div>
+            </div>
+
+            <!-- Calculate missing dimension -->
+            <div class="section handdrawn-border">
+                <h2>Find Missing Dimension</h2>
+                <p class="field-hint" style="margin-top: 0; margin-bottom: 10px;">Pick a common ratio or enter a custom one, then fill either width or height.</p>
+
+                <div class="preset-row" id="preset-row">
+                    <button type="button" class="btn preset-btn active" data-w="16" data-h="9">16:9</button>
+                    <button type="button" class="btn preset-btn" data-w="4" data-h="3">4:3</button>
+                    <button type="button" class="btn preset-btn" data-w="1" data-h="1">1:1</button>
+                    <button type="button" class="btn preset-btn" data-w="21" data-h="9">21:9</button>
+                    <button type="button" class="btn preset-btn" data-w="3" data-h="2">3:2</button>
+                    <button type="button" class="btn preset-btn" data-w="9" data-h="16">9:16</button>
+                </div>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label for="ratio-w">Ratio W</label>
+                        <input type="number" id="ratio-w" class="handdrawn-input" min="1" step="any" value="16">
+                    </div>
+                    <div class="field" style="flex: 0 0 auto; align-self: center; padding-top: 18px; font-weight: bold; font-size: 1.4em;">:</div>
+                    <div class="field">
+                        <label for="ratio-h">Ratio H</label>
+                        <input type="number" id="ratio-h" class="handdrawn-input" min="1" step="any" value="9">
+                    </div>
+                </div>
+
+                <hr class="divider">
+
+                <div class="field-row">
+                    <div class="field">
+                        <label for="known-width">Width (px)</label>
+                        <input type="number" id="known-width" class="handdrawn-input" min="1" step="1" value="1920" placeholder="known width">
+                    </div>
+                    <div class="field">
+                        <label for="known-height">Height (px)</label>
+                        <input type="number" id="known-height" class="handdrawn-input" min="1" step="1" placeholder="leave empty to calculate">
+                    </div>
+                </div>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-success" id="calc-missing-btn">Calculate Missing Side</button>
+                    <button type="button" class="btn" id="clear-known-btn">Clear Sides</button>
+                </div>
+
+                <div class="result-box">
+                    <div class="result-label">Result</div>
+                    <div class="result-value" id="missing-output">1920 × 1080</div>
+                    <div class="result-meta" id="missing-meta">Using ratio 16:9</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const COMMON = [
+            { w: 16, h: 9, label: '16:9' },
+            { w: 4, h: 3, label: '4:3' },
+            { w: 1, h: 1, label: '1:1' },
+            { w: 21, h: 9, label: '21:9' },
+            { w: 3, h: 2, label: '3:2' },
+            { w: 9, h: 16, label: '9:16' },
+            { w: 5, h: 4, label: '5:4' },
+            { w: 32, h: 9, label: '32:9' },
+            { w: 2, h: 1, label: '2:1' },
+            { w: 3, h: 1, label: '3:1' }
+        ];
+
+        const ERROR_MSG = {
+            empty: 'Enter a value — fields cannot be empty.',
+            zero: 'Value must be greater than zero (division by zero is not allowed).',
+            negative: 'Negative numbers are not allowed.',
+            invalid: 'Enter a valid finite number.',
+            too_small: 'Width and height must be at least 1 px after rounding.',
+            need_one_side: 'Fill either width or height (leave the other empty).',
+            both_filled: 'Clear one side to recalculate the missing dimension.',
+            overflow: 'Result is too large or not a finite number. Try smaller inputs.',
+            ratio: 'Enter a valid ratio with both parts greater than zero.'
+        };
+
+        function trackEvent(action) {
+            if (typeof gtag === 'function') {
+                gtag('event', 'tool_interaction', { action: action });
+            }
+        }
+
+        /**
+         * Strict positive finite number parser.
+         * Rejects empty, NaN, Infinity, zero, and negatives.
+         * Uses Number() (not parseFloat) so "12abc" is invalid.
+         */
+        function parsePositiveNumber(raw) {
+            if (raw === null || raw === undefined) {
+                return { ok: false, reason: 'empty' };
+            }
+            const s = String(raw).trim();
+            if (s === '') {
+                return { ok: false, reason: 'empty' };
+            }
+            const n = Number(s);
+            if (!Number.isFinite(n)) {
+                return { ok: false, reason: 'invalid' };
+            }
+            if (n < 0) {
+                return { ok: false, reason: 'negative' };
+            }
+            if (n === 0) {
+                return { ok: false, reason: 'zero' };
+            }
+            return { ok: true, value: n };
+        }
+
+        function gcd(a, b) {
+            a = Math.abs(Math.round(a));
+            b = Math.abs(Math.round(b));
+            if (!Number.isFinite(a) || !Number.isFinite(b)) {
+                return 1;
+            }
+            while (b) {
+                const t = b;
+                b = a % b;
+                a = t;
+            }
+            return a || 1;
+        }
+
+        function simplifyRatio(w, h) {
+            const wi = Math.round(w);
+            const hi = Math.round(h);
+            if (wi < 1 || hi < 1 || !Number.isFinite(wi) || !Number.isFinite(hi)) {
+                return null;
+            }
+            const d = gcd(wi, hi);
+            return { w: wi / d, h: hi / d };
+        }
+
+        function matchCommon(rw, rh) {
+            if (!Number.isFinite(rw) || !Number.isFinite(rh) || rh === 0) {
+                return null;
+            }
+            const decimal = rw / rh;
+            for (const c of COMMON) {
+                if (c.w === rw && c.h === rh) return c.label;
+                if (c.h === 0) continue;
+                const cd = c.w / c.h;
+                if (Math.abs(decimal - cd) < 0.002) return c.label;
+            }
+            return null;
+        }
+
+        function updatePreview(w, h) {
+            const preview = document.getElementById('ratio-preview');
+            if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) {
+                preview.style.width = '40px';
+                preview.style.height = '40px';
+                return;
+            }
+            const maxW = 220;
+            const maxH = 140;
+            const scale = Math.min(maxW / w, maxH / h);
+            if (!Number.isFinite(scale) || scale <= 0) {
+                preview.style.width = '40px';
+                preview.style.height = '40px';
+                return;
+            }
+            preview.style.width = Math.max(12, Math.round(w * scale)) + 'px';
+            preview.style.height = Math.max(12, Math.round(h * scale)) + 'px';
+        }
+
+        function setRatioError(message) {
+            document.getElementById('ratio-output').textContent = '—';
+            document.getElementById('ratio-decimal').textContent = message;
+            updatePreview(0, 0);
+        }
+
+        function setMissingError(message) {
+            document.getElementById('missing-output').textContent = '—';
+            document.getElementById('missing-meta').textContent = message;
+        }
+
+        function calculateRatio() {
+            const widthParsed = parsePositiveNumber(document.getElementById('width-input').value);
+            const heightParsed = parsePositiveNumber(document.getElementById('height-input').value);
+
+            if (!widthParsed.ok) {
+                setRatioError('Width: ' + ERROR_MSG[widthParsed.reason]);
+                return;
+            }
+            if (!heightParsed.ok) {
+                setRatioError('Height: ' + ERROR_MSG[heightParsed.reason]);
+                return;
+            }
+
+            const w = widthParsed.value;
+            const h = heightParsed.value;
+            const simplified = simplifyRatio(w, h);
+            if (!simplified) {
+                setRatioError(ERROR_MSG.too_small);
+                return;
+            }
+
+            // Guard against division by zero (height already validated > 0)
+            const decimal = w / h;
+            if (!Number.isFinite(decimal)) {
+                setRatioError(ERROR_MSG.overflow);
+                return;
+            }
+
+            trackEvent('calculate_ratio');
+
+            const common = matchCommon(simplified.w, simplified.h);
+            const label = common || (simplified.w + ':' + simplified.h);
+            const wi = Math.round(w);
+            const hi = Math.round(h);
+
+            document.getElementById('ratio-output').textContent = label;
+            document.getElementById('ratio-decimal').textContent =
+                'Simplified ' + simplified.w + ':' + simplified.h +
+                ' · Decimal: ' + decimal.toFixed(3) +
+                ' · ' + wi + ' × ' + hi + ' px';
+            updatePreview(w, h);
+        }
+
+        function setPreset(w, h, btn) {
+            document.getElementById('ratio-w').value = w;
+            document.getElementById('ratio-h').value = h;
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+        }
+
+        function syncPresetHighlight() {
+            const rw = parsePositiveNumber(document.getElementById('ratio-w').value);
+            const rh = parsePositiveNumber(document.getElementById('ratio-h').value);
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                const bw = Number(btn.dataset.w);
+                const bh = Number(btn.dataset.h);
+                const active = rw.ok && rh.ok && bw === rw.value && bh === rh.value;
+                btn.classList.toggle('active', active);
+            });
+        }
+
+        function calculateMissing() {
+            const ratioW = parsePositiveNumber(document.getElementById('ratio-w').value);
+            const ratioH = parsePositiveNumber(document.getElementById('ratio-h').value);
+
+            if (!ratioW.ok || !ratioH.ok) {
+                const reason = !ratioW.ok ? ratioW.reason : ratioH.reason;
+                setMissingError('Ratio: ' + (ERROR_MSG[reason] || ERROR_MSG.ratio));
+                return;
+            }
+
+            const rw = ratioW.value;
+            const rh = ratioH.value;
+            const kwRaw = document.getElementById('known-width').value;
+            const khRaw = document.getElementById('known-height').value;
+            const kwEmpty = String(kwRaw).trim() === '';
+            const khEmpty = String(khRaw).trim() === '';
+
+            const widthParsed = kwEmpty ? null : parsePositiveNumber(kwRaw);
+            const heightParsed = khEmpty ? null : parsePositiveNumber(khRaw);
+
+            // Invalid filled side (zero / negative / Infinity / garbage)
+            if (widthParsed && !widthParsed.ok) {
+                setMissingError('Width: ' + ERROR_MSG[widthParsed.reason]);
+                return;
+            }
+            if (heightParsed && !heightParsed.ok) {
+                setMissingError('Height: ' + ERROR_MSG[heightParsed.reason]);
+                return;
+            }
+
+            const hasW = !!widthParsed;
+            const hasH = !!heightParsed;
+
+            if (hasW && hasH) {
+                setMissingError(
+                    ERROR_MSG.both_filled + ' Current: ' +
+                    Math.round(widthParsed.value) + ' × ' + Math.round(heightParsed.value) +
+                    ' · Ratio ' + rw + ':' + rh
+                );
+                return;
+            }
+            if (!hasW && !hasH) {
+                setMissingError(ERROR_MSG.need_one_side);
+                return;
+            }
+
+            let outW;
+            let outH;
+            if (hasW) {
+                outW = widthParsed.value;
+                outH = (outW * rh) / rw;
+            } else {
+                outH = heightParsed.value;
+                outW = (outH * rw) / rh;
+            }
+
+            // Catch division issues / overflow (Infinity, NaN)
+            if (!Number.isFinite(outW) || !Number.isFinite(outH) || outW <= 0 || outH <= 0) {
+                setMissingError(ERROR_MSG.overflow);
+                return;
+            }
+
+            trackEvent('calculate_missing_dimension');
+
+            const roundW = Math.round(outW);
+            const roundH = Math.round(outH);
+            document.getElementById('missing-output').textContent = roundW + ' × ' + roundH;
+            document.getElementById('missing-meta').textContent =
+                (hasW ? 'Height from width' : 'Width from height') +
+                ' · Ratio ' + rw + ':' + rh +
+                ' · Exact: ' + outW.toFixed(2) + ' × ' + outH.toFixed(2) + ' px';
+
+            if (hasW) {
+                document.getElementById('known-height').value = String(roundH);
+            } else {
+                document.getElementById('known-width').value = String(roundW);
+            }
+        }
+
+        document.getElementById('calc-ratio-btn').onclick = calculateRatio;
+        document.getElementById('calc-missing-btn').onclick = calculateMissing;
+
+        document.getElementById('swap-dims-btn').onclick = () => {
+            const w = document.getElementById('width-input');
+            const h = document.getElementById('height-input');
+            const tmp = w.value;
+            w.value = h.value;
+            h.value = tmp;
+            calculateRatio();
+        };
+
+        document.getElementById('clear-known-btn').onclick = () => {
+            document.getElementById('known-width').value = '';
+            document.getElementById('known-height').value = '';
+            setMissingError(ERROR_MSG.need_one_side);
+        };
+
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.onclick = () => setPreset(btn.dataset.w, btn.dataset.h, btn);
+        });
+
+        ['ratio-w', 'ratio-h'].forEach(id => {
+            document.getElementById(id).addEventListener('input', syncPresetHighlight);
+        });
+
+        ['width-input', 'height-input'].forEach(id => {
+            document.getElementById(id).addEventListener('keydown', e => {
+                if (e.key === 'Enter') calculateRatio();
+            });
+        });
+
+        ['known-width', 'known-height', 'ratio-w', 'ratio-h'].forEach(id => {
+            document.getElementById(id).addEventListener('keydown', e => {
+                if (e.key === 'Enter') calculateMissing();
+            });
+        });
+
+        // Initial state
+        calculateRatio();
+        calculateMissing();
+    </script>
+</body>
+</html>
